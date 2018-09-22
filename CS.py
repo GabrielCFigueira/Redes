@@ -9,10 +9,6 @@ CSPort = 58037
 
 userCredentials = { "86420" : "12345678" } # dictionary of user ids with their respective passwords
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(('', CSPort))
-server.listen(20)  # max backlog of connections
-
 
 def createUser(istid, password):
     userCredentials[istid] = password
