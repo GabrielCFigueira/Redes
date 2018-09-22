@@ -44,7 +44,7 @@ def read_command():
         commands = command.split()
 
         if commands[0]=="login":
-            if len(commands)==3:
+            if len(commands)!=3:
                 err_messages("AUT")
             else:
                 connect_TCP()
