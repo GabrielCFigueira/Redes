@@ -8,12 +8,14 @@ flagCSname=""
 CSname = socket.gethostname()
 flagCSport=""
 CSport = 58037
-
+client = ""
 user=""
 passwd=""
 flag_AUT=0
 
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def creatClient():
+    global client
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def input_command():
     global flagCSname, CSname, flagCSport, CSport
@@ -53,11 +55,12 @@ def receive_message():
     global client
     response = client.recv(4096)
     response_list = response.decode().split()
-    if get_field(response_list,0)=="ERR":
-        err_messages(get_field(response_list,1))
+    if len(response_list) > 0:
+        if get_field(response_list,0)=="ERR":
+            err_messages(get_field(response_list,1))
 
 def read_command():
-    global user, passwd, flag_AUT
+    global user, passwd, flag_AUT, client
     command = ""
     while command != "exit":
         command = input()
@@ -68,6 +71,7 @@ def read_command():
                 if len(commands)!=3:
                     err_messages("AUT")
                 else:
+                    creatClient()
                     connect_TCP()
                     user=get_field(commands,1)
                     passwd=get_field(commands,2)
@@ -87,16 +91,14 @@ def read_command():
                 send_message("DLU\n")
                 receive_message()
                 reset_flag_AUT()
-        
+
         elif get_field(commands,0)=="logout":
             if user == "" and passwd == "":
                 err_messages("AUT")
             else:
-                if flag_AUT==0:
-                    send_message("AUT "+user+" "+passwd+"\n")
-                    receive_message()
                 send_message("EXI\n")
                 receive_message()
+                client.close()
                 user=""
                 passwd=""
                 reset_flag_AUT()
