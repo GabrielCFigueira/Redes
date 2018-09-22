@@ -4,15 +4,19 @@ from abstraction_util import *
 import sys
 import socket
 
+flagCSname=""
 CSname = socket.gethostname()
+flagCSport=""
 CSport = 58037
 
 user=""
 passwd=""
 flag_AUT=0
+
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def input_command():
+    global flagCSname, CSname, flagCSport, CSport
     if len(sys.argv)==3:
         if get_field(sys.argv,1)=="-n":
             flagCSname = get_field(sys.argv,1)
@@ -28,6 +32,7 @@ def input_command():
         CSport = eval(get_field(sys.argv,4))
 
 def reset_flag_AUT():
+    global flag_AUT
     flag_AUT=0
 
 def printar(arg1, arg2, arg3, arg4):
@@ -37,20 +42,22 @@ def printar(arg1, arg2, arg3, arg4):
         print(arg4)
 
 def connect_TCP():
+    global client
     client.connect((CSname, CSport))
 
 def send_message(message):
+    global client
     client.send(message.encode())
 
 def receive_message():
+    global client
     response = client.recv(4096)
     response_list = response.decode().split()
     if get_field(response_list,0)=="ERR":
         err_messages(get_field(response_list,1))
 
 def read_command():
-    global user
-    global passwd
+    global user, passwd, flag_AUT
     command = ""
     while command != "exit":
         command = input()
