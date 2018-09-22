@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from abstraction_util import *
 
 import sys
 import socket
@@ -6,12 +7,23 @@ import socket
 CSname = socket.gethostname()
 CSport = 58037
 
-if len(sys.argv)==3:
-    flagCSname = sys.argv[1]
-    CSname = sys.argv[2]
-elif len(sys.argv)==5:
-    flagCSport = sys.argv[3]
-    CSport = eval(sys.argv[4])
+user=""
+passwd=""
+
+def input_command():
+    if len(sys.argv)==3:
+        if get_field(sys.argv,1)=="-n":
+            flagCSname = get_field(sys.argv,1)
+            CSname = get_field(sys.argv,2)
+        elif get_field(sys.argv,1)=="-p":
+            flagCSport = get_field(sys.argv,1)
+            CSport = eval(get_field(sys.argv,2))
+
+    elif len(sys.argv)==5:
+        flagCSname = get_field(sys.argv,1)
+        CSname = get_field(sys.argv,2)
+        flagCSport = get_field(sys.argv,3)
+        CSport = eval(get_field(sys.argv,4))
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -30,12 +42,8 @@ def send_message(message):
 def receive_message():
     response = client.recv(4096)
     response_list = response.decode().split()
-    if response_list[0]=="ERR":
-        err_messages(response_list[1])
-
-def err_messages(flag):
-    if flag=="AUT":
-        print("Para se autenticar tem que executar: login user pass")
+    if get_field(response_list,0)=="ERR":
+        err_messages(get_field(response_list,1))
 
 def read_command():
     command = ""
@@ -43,14 +51,19 @@ def read_command():
         command = input()
         commands = command.split()
 
-        if commands[0]=="login":
+        if get_field(commands,0)=="login":
             if len(commands)!=3:
                 err_messages("AUT")
             else:
                 connect_TCP()
-                send_message("AUT "+commands[1]+" "+commands[2]+"\n")
+                send_message("AUT "+get_field(commands,1)+" "+get_field(commands,2)+"\n")
                 receive_message()
 
+        elif get_field(commands,0)=="deluser":
+            connect_TCP()
+            send_message("DLU\n")
+            receive_message()
 
+input_command()
 read_command()
 exit()
