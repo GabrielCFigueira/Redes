@@ -9,6 +9,8 @@ CSport = 58037
 
 user=""
 passwd=""
+flag_AUT=0
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def input_command():
     if len(sys.argv)==3:
@@ -25,7 +27,8 @@ def input_command():
         flagCSport = get_field(sys.argv,3)
         CSport = eval(get_field(sys.argv,4))
 
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def reset_flag_AUT():
+    flag_AUT=0
 
 def printar(arg1, arg2, arg3, arg4):
     if arg1=="-n":
@@ -46,22 +49,50 @@ def receive_message():
         err_messages(get_field(response_list,1))
 
 def read_command():
+    global user
+    global passwd
     command = ""
     while command != "exit":
         command = input()
         commands = command.split()
 
         if get_field(commands,0)=="login":
-            if len(commands)!=3:
-                err_messages("AUT")
+            if user == "" and passwd == "":
+                if len(commands)!=3:
+                    err_messages("AUT")
+                else:
+                    connect_TCP()
+                    user=get_field(commands,1)
+                    passwd=get_field(commands,2)
+                    send_message("AUT "+user+" "+passwd+"\n")
+                    receive_message()
+                    flag_AUT=1
             else:
-                connect_TCP()
-                send_message("AUT "+get_field(commands,1)+" "+get_field(commands,2)+"\n")
-                receive_message()
+                err_messages("ERR_login2")
 
         elif get_field(commands,0)=="deluser":
-            send_message("DLU\n")
-            receive_message()
+            if user == "" and passwd == "":
+                err_messages("AUT")
+            else:
+                if flag_AUT==0:
+                    send_message("AUT "+user+" "+passwd+"\n")
+                    receive_message()
+                send_message("DLU\n")
+                receive_message()
+                reset_flag_AUT()
+        
+        elif get_field(commands,0)=="logout":
+            if user == "" and passwd == "":
+                err_messages("AUT")
+            else:
+                if flag_AUT==0:
+                    send_message("AUT "+user+" "+passwd+"\n")
+                    receive_message()
+                send_message("EXI\n")
+                receive_message()
+                user=""
+                passwd=""
+                reset_flag_AUT()
 
 input_command()
 read_command()
