@@ -60,7 +60,6 @@ def read_command():
                 receive_message()
 
         elif get_field(commands,0)=="deluser":
-            connect_TCP()
             send_message("DLU\n")
             receive_message()
 

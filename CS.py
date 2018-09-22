@@ -17,25 +17,29 @@ server.listen(20)  # max backlog of connections
 def createUser(istid, password):
     userCredentials[istid] = password
 
-
+def printRequirement(istid, address, requestType, directory = ''):
+    print("User:" + istid + " Requirement:" + requestType + "\nIP:" + str(address[0]) + " Port:" + str(address[1]))
 
 def authenticate(client_socket, adress):
     message = client_socket.recv(1024).decode()
     messages = message.split()
     istid = messages[1]
+    password = messages[2]
     if messages[0] != "AUT":
         client_socket.send("ERR AUT\n".encode())
-    elif messages[1] in userCredentials:
-        if userCredentials[messages[1]] == messages[2]:
-            client_socket.send("AUR OK\n".encode())
-            handle_client_connection(client_socket)
-        else:
-            client_socket.send("AUR NOK\n".encode())
-            #client_socket.close()
     else:
-        client_socket.send("AUR NEW\n".encode())
-        createUser(messages[1], messages[2])
-        handle_client_connection(client_socket, istid)
+        printRequirement(istid, address, "AUT")
+        if istid in userCredentials:
+            if userCredentials[istid] == password:
+                client_socket.send("AUR OK\n".encode())
+                handle_client_connection(client_socket, istid)
+            else:
+                client_socket.send("AUR NOK\n".encode())
+                #client_socket.close()
+        else:
+            client_socket.send("AUR NEW\n".encode())
+            createUser(istid, password)
+            handle_client_connection(client_socket, istid)
 
 
 
@@ -44,18 +48,13 @@ def handle_client_connection(client_socket, istid):
     messages = message.split()
     if messages[0] == "DLU":
         del(userCredentials[istid])
-""" elif messages[0] == "DLR":
-    elif messages[0] == "BCK":
-    elif messages[0] == "BKR":
+        client_socket.send("DLR OK\n".encode())
+""" elif messages[0] == "BCK":
     elif messages[0] == "RST":
-    elif messages[0] == "RSR":
     elif messages[0] == "LSD":
-    elif messages[0] == "LDR":
     elif messages[0] == "LSF":
-    elif messages[0] == "LFD":
     elif messages[0] == "LSD":
-    elif messages[0] == "DEL":
-    elif messages[0] == "DDR":       """
+    elif messages[0] == "DEL":      """
 
 
     #exit()
