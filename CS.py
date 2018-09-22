@@ -22,13 +22,13 @@ def authenticate(client_socket, adress):
     messages = message.split()
     if messages[0] in userCredentials:
         if userCredentials[messages[0]] == messages[1]:
-            client_socket.send("OK\n".encode())
+            client_socket.send("AUR OK\n".encode())
             handle_client_connection(client_socket)
         else:
-            client_socket.send("NOK\n".encode())
+            client_socket.send("AUR NOK\n".encode())
             client_socket.close()
     else:
-        client_socket.send("NEW\n".encode())
+        client_socket.send("AUR NEW\n".encode())
         #criar utilizador
         client_socket.close()
 
@@ -55,7 +55,7 @@ def init():
 
 
 
-
+init()
 while True:
     client_socket, address = server.accept()
     print('Accepted connection from {}:{}'.format(address[0], address[1]))
