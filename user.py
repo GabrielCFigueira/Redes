@@ -4,9 +4,7 @@ from abstraction_util import *
 import sys
 import socket
 
-flagCSname=""
 CSname = socket.gethostname()
-flagCSport=""
 CSport = 58037
 client = ""
 user=""
@@ -21,16 +19,12 @@ def input_command():
     global flagCSname, CSname, flagCSport, CSport
     if len(sys.argv)==3:
         if get_field(sys.argv,1)=="-n":
-            flagCSname = get_field(sys.argv,1)
             CSname = get_field(sys.argv,2)
         elif get_field(sys.argv,1)=="-p":
-            flagCSport = get_field(sys.argv,1)
             CSport = eval(get_field(sys.argv,2))
 
     elif len(sys.argv)==5:
-        flagCSname = get_field(sys.argv,1)
         CSname = get_field(sys.argv,2)
-        flagCSport = get_field(sys.argv,3)
         CSport = eval(get_field(sys.argv,4))
 
 def reset_flag_AUT():
