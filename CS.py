@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
+from abstraction_util import *
 
 import sys
 import socket
 import os
 import signal
 
-
-CSPort = 58037
+CSPort = DEFAULT_PORT_CS
 
 userCredentials = { "86420" : "12345678" } # dictionary of user ids with their respective passwords
 
@@ -38,13 +38,13 @@ def authenticate(client_socket, adress):
         printRequirement(istid, address, "AUT")
         if istid in userCredentials:
             if userCredentials[istid] == password:
-                client_socket.send("AUR OK\n".encode())
+                client_socket.send(US_CS_AUR_OK.encode())
                 return handle_client_connection(client_socket, istid, address)
             else:
-                client_socket.send("AUR NOK\n".encode())
+                client_socket.send(US_CS_AUR_NOK.encode())
                 #client_socket.close()
         else:
-            client_socket.send("AUR NEW\n".encode())
+            client_socket.send(US_CS_AUR_NEW.encode())
             createUser(istid, password)
             return handle_client_connection(client_socket, istid, address)
     return False
@@ -60,7 +60,7 @@ def handle_client_connection(client_socket, istid, address):
     if requirement == "DLU":
         printRequirement(istid, address, "DLU")
         del(userCredentials[istid])
-        client_socket.send("DLR OK\n".encode())
+        client_socket.send(US_CS_DLR_OK.encode())
     return False
 """ elif requirement == "BCK":
     elif requirement == "RST":

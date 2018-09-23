@@ -5,7 +5,7 @@ import sys
 import socket
 
 CSname = socket.gethostname()
-CSport = 58037
+CSport = DEFAULT_PORT_CS
 client = ""
 user=""
 passwd=""
@@ -82,7 +82,7 @@ def read_command():
                 if flag_AUT==0:
                     send_message("AUT "+user+" "+passwd+"\n")
                     receive_message()
-                send_message("DLU\n")
+                send_message(US_CS_DLU)
                 receive_message()
                 reset_flag_AUT()
 
