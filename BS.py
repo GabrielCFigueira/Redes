@@ -11,8 +11,10 @@ userCredentials = { "86420" : "12345678" }
 bufferSize   = 1024
 
 def sigInt_handler(signum,frame):
-    global server
-    server.close()
+    #global server
+    global UDPClientSocket
+    #server.close()
+    UDPClientSocket.close()
     exit()
 
 signal.signal(signal.SIGINT,sigInt_handler)
@@ -27,9 +29,9 @@ if(len(sys.argv) != 1):
             CSport = sys.argv[i+1]
         i=i+1
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(('', BSport))
-server.listen(20)
+#server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#server.bind(('', BSport))
+#server.listen(20)
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
 def printRequirement(istid, address, requestType, directory = ''):
@@ -63,16 +65,17 @@ def handle_TCP_connection(client_socket):
     client_socket.send('ACK!'.encode())
     client_socket.close()
 
-while True:
+def handle_UDP_connection():
     msgFromClient       = input()
     bytesToSend         = str.encode(msgFromClient)
-    serverAddressPort   = (gethostbyname(CSname), CSport)
+    serverAddressPort   = (socket.gethostbyname(CSname), CSport)
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
+    msgFromServer = UDPClientSocket.recvfrom(bufferSize)[0].decode()
+    msg = "Message from Server {}".format(msgFromServer)
 
-msgFromServer = UDPClientSocket.recvfrom(bufferSize)[0].decode()
+while True:
+    handle_UDP_connection()
 
-msg = "Message from Server {}".format(msgFromServer)
-
-client_sock, address = server.accept()
-print('Accepted connection from {}:{}'.format(address[0], address[1]))
-handle_TCP_connection(client_sock)
+#client_sock, address = server.accept()
+#print('Accepted connection from {}:{}'.format(address[0], address[1]))
+#handle_TCP_connection(client_sock)
