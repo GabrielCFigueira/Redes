@@ -84,6 +84,9 @@ def read_command():
                     receive_message()
                 send_message(US_CS_DLU)
                 receive_message()
+                client.close()
+                user=""
+                passwd=""
                 reset_flag_AUT()
 
         elif get_field(commands,0)=="logout":
