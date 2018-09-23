@@ -86,7 +86,10 @@ server.listen(20)  # max backlog of connections
 
 while True:
     client_socket, address = server.accept()
-    print('Accepted connection from {}:{}'.format(address[0], address[1]))
-    connectionClosed = False
-    while not connectionClosed:
-        connectionClosed = authenticate(client_socket, address)
+    pid = os.fork()
+    if pid == 0:
+        print('Accepted connection from {}:{}'.format(address[0], address[1]))
+        connectionClosed = False
+        while not connectionClosed:
+            connectionClosed = authenticate(client_socket, address)
+            exit()
