@@ -81,14 +81,14 @@ elif len(sys.argv) > 1:
     exit()
 
 
-
+UDPWriter, UDPReader = os.pipe()
 
 if os.fork() == 0:
-    UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-    UDPServerSocket.bind(('', CSPort))
+    server = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+    server.bind(('', CSPort))
     while True:
 
-        bytesAddressPair = UDPServerSocket.recvfrom(1024)
+        bytesAddressPair = server.recvfrom(1024)
 
         message = bytesAddressPair[0].decode()
 
@@ -102,7 +102,7 @@ if os.fork() == 0:
 
         # Sending a reply to client
 
-        #UDPServerSocket.sendto(bytesToSend, address)
+        server.sendto("".encode(), address)
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(('', CSPort))
