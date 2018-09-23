@@ -46,12 +46,13 @@ def send_message(message):
     client.send(message.encode())
 
 def receive_message():
-    global client
-    response = client.recv(4096)
-    response_list = response.decode().split()
-    if len(response_list) > 0:
-        if get_field(response_list,0)=="ERR":
-            err_messages(get_field(response_list,1))
+    global client, user, passwd
+    response = client.recv(4096).decode()
+    err_messages(response)
+    if response=="AUR NOK\n":
+        user = ""
+        passwd = ""
+    
 
 def read_command():
     global user, passwd, flag_AUT, client
@@ -73,7 +74,7 @@ def read_command():
                     receive_message()
                     flag_AUT=1
             else:
-                err_messages("ERR_login2")
+                err_messages("ERR_login")
 
         elif get_field(commands,0)=="deluser":
             if user == "" and passwd == "":
@@ -94,7 +95,6 @@ def read_command():
                 err_messages("AUT")
             else:
                 send_message("EXI\n")
-                receive_message()
                 client.close()
                 user=""
                 passwd=""

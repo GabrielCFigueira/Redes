@@ -14,7 +14,9 @@ def get_field(list, pos):
     return list[pos]
 
 def err_messages(flag):
-    if flag=="AUT":
+    if flag=="ERR AUT\n":
         print("Para se autenticar tem que executar: login user pass")
-    elif flag=="ERR_login2":
+    elif flag=="ERR_login":
         print("Já efectuou um login")
+    elif flag=="AUR NOK\n":
+        print("Erro na pass tente novamente com: login user pass")
