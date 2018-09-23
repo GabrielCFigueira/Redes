@@ -58,7 +58,6 @@ def handle_client_connection(client_socket, istid, address):
     elif requirement == "RST":
     elif requirement == "LSD":
     elif requirement == "LSF":
-    elif requirement == "LSD":
     elif requirement == "DEL":      """
 
     #exit()
