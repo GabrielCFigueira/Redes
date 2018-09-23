@@ -5,6 +5,7 @@ import sys
 import socket
 import os
 import signal
+import threading
 
 CSPort = DEFAULT_PORT_CS
 
@@ -71,6 +72,11 @@ def handle_client_connection(client_socket, istid, address):
     #exit()
 
 
+class UDP:
+    def __init__(self, ip, port):
+        self.ip = ip
+        self.port = port
+        self.state = 0
 
 
 
@@ -84,6 +90,8 @@ elif len(sys.argv) > 1:
 UDPWriter, UDPReader = os.pipe()
 
 if os.fork() == 0:
+    os.close(UDPReader)
+    UDPWriter = os.fdopen(UDPWriter, 'w')
     server = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     server.bind(('', CSPort))
     while True:
@@ -91,7 +99,7 @@ if os.fork() == 0:
         bytesAddressPair = server.recvfrom(1024)
 
         message = bytesAddressPair[0].decode()
-
+        UDPWriter.write(message)
         address = bytesAddressPair[1]
 
         clientMsg = "Message from Client:{}".format(message)
@@ -102,15 +110,26 @@ if os.fork() == 0:
 
         # Sending a reply to client
 
-        server.sendto("".encode(), address)
+        server.sendto("RGR OK".encode(), address)
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(('', CSPort))
 server.listen(20)  # max backlog of connections
 
 PipeList = []
-leitorEscravo = 0
-escritorMestre = 0
+BSList = []
+
+mutex = threading.Lock()
+def thread():
+    os.close(UDPWriter)
+    UDPReader = os.fdopen(UDPReader)
+    while True:
+        message = UDPReader.read()
+        messages = message.split()
+        BS = UDP(messages[1], messages[2])
+        mutex.acquire()
+        BSList += [BS]
+        mutex.release()
 
 
 
