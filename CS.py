@@ -3,12 +3,20 @@
 import sys
 import socket
 import os
+import signal
 
 
 CSPort = 58037
 
 userCredentials = { "86420" : "12345678" } # dictionary of user ids with their respective passwords
 
+
+def sigInt_handler(signum,frame):
+    global server
+    server.close()
+    exit()
+
+signal.signal(signal.SIGINT,sigInt_handler)
 
 def createUser(istid, password):
     userCredentials[istid] = password
@@ -68,7 +76,7 @@ def handle_client_connection(client_socket, istid, address):
 
 if len(sys.argv) == 3 and sys.argv[1] == "-p":
     CSPort = eval(sys.argv[2])
-elif n_argument > 1:
+elif len(sys.argv) > 1:
     raise ValueError("numero errado de argumentos")
     exit()
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
