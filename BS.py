@@ -8,6 +8,7 @@ BSport = 59000
 CSname = socket.gethostname()
 CSport = 58037
 userCredentials = { "86420" : "12345678" }
+bufferSize   = 1024
 
 def sigInt_handler(signum,frame):
     global server
@@ -29,6 +30,7 @@ if(len(sys.argv) != 1):
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(('', BSport))
 server.listen(20)
+UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
 def printRequirement(istid, address, requestType, directory = ''):
     print("User:" + istid + " Requirement:" + requestType + "\nIP:" + str(address[0]) + " Port:" + str(address[1]))
@@ -48,25 +50,29 @@ def authenticate(client_socket, adress):
         if istid in userCredentials:
             if userCredentials[istid] == password:
                 client_socket.send("AUR OK\n".encode())
-                return handle_client_connection(client_socket, istid, address)
+                return handle_TCP_connection(client_socket, istid, address)
             else:
                 client_socket.send("AUR NOK\n".encode())
                 #client_socket.close()
     return False
 
 
-def handle_client_connection(client_socket):
+def handle_TCP_connection(client_socket):
     request = client_socket.recv(1024)
     print('Received {}'.format(request.decode()))
     client_socket.send('ACK!'.encode())
     client_socket.close()
-    #exit()
 
 while True:
-    #while i<2:
-    client_sock, address = server.accept()
-    print('Accepted connection from {}:{}'.format(address[0], address[1]))
-    #    i=i+1
-    #    pid=os.fork()
-    #    if pid==0:
-    handle_client_connection(client_sock)
+    msgFromClient       = input()
+    bytesToSend         = str.encode(msgFromClient)
+    serverAddressPort   = (gethostbyname(CSname), CSport)
+    UDPClientSocket.sendto(bytesToSend, serverAddressPort)
+
+msgFromServer = UDPClientSocket.recvfrom(bufferSize)[0].decode()
+
+msg = "Message from Server {}".format(msgFromServer)
+
+client_sock, address = server.accept()
+print('Accepted connection from {}:{}'.format(address[0], address[1]))
+handle_TCP_connection(client_sock)
