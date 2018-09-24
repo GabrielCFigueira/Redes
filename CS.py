@@ -52,6 +52,7 @@ def handle_client_connection(client_socket, istid, address):
     message = client_socket.recv(1024).decode()
     messages = message.split()
     if len(messages) == 0 or messages[0] == "EXI":
+        client_socket.send("EXI\n".encode())
         client_socket.close()
     requirement = messages[0]
     if requirement == "DLU":
@@ -113,7 +114,7 @@ elif len(sys.argv) > 1:
 
 manager = multiprocessing.Manager()
 userCredentials = manager.dict()
-userCredentials[86420] = "12345678" #exemplo
+userCredentials["86420"] = "12345678" #exemplo
 BSList = manager.list(range(10))
 
 UDPProcess = multiprocessing.Process(target=UDPFunc, args=(BSList,))

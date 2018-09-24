@@ -6,15 +6,11 @@ import socket
 
 CSname = socket.gethostname()
 CSport = DEFAULT_PORT_CS
-client = ""
 user=""
 passwd=""
 flag_AUT=0
 
-def creatClient():
-    global client
-    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+#---------------------------------------------------------------
 def input_command():
     global flagCSname, CSname, flagCSport, CSport
     if len(sys.argv)==3:
@@ -30,49 +26,54 @@ def input_command():
 def reset_flag_AUT():
     global flag_AUT
     flag_AUT=0
+#---------------------------------------------------------------
+def creatClient():
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    return client
 
-def printar(arg1, arg2, arg3, arg4):
-    if arg1=="-n":
-        print(arg2)
-    if arg3=="-p":
-        print(arg4)
-
-def connect_TCP():
-    global client
+def connect_TCP(client):
     client.connect((CSname, CSport))
 
-def send_message(message):
-    global client
+def send_message(message, client):
     client.send(message.encode())
 
-def receive_message():
-    global client, user, passwd
+def receive_message(client):
+    global user, passwd, flag_AUT
+    
     response = client.recv(4096).decode()
     err_messages(response)
-    if response=="AUR NOK\n":
+
+    if response=="AUR OK\n":
+        flag_AUT=1
+        print("Logged in")
+    elif response=="AUR NOK\n":
         user = ""
         passwd = ""
+    elif response=="AUR NEW\n":
+        print("User \"" + user + "\" created")
 
+    client.close()
 
+#---------------------------------------------------------------
 def read_command():
-    global user, passwd, flag_AUT, client
+    global user, passwd, flag_AUT
     command = ""
     while command != "exit":
-        command = input(">")
+        command = input("> ")
         commands = command.split()
+
+        client=creatClient()
+        connect_TCP(client)
 
         if get_field(commands,0)=="login":
             if user == "" and passwd == "":
                 if len(commands)!=3:
                     err_messages("AUT")
                 else:
-                    creatClient()
-                    connect_TCP()
                     user=get_field(commands,1)
                     passwd=get_field(commands,2)
-                    send_message("AUT "+user+" "+passwd+"\n")
-                    receive_message()
-                    flag_AUT=1
+                    send_message("AUT "+user+" "+passwd+"\n", client)
+                    receive_message(client)
             else:
                 err_messages("ERR_login")
 
@@ -81,24 +82,23 @@ def read_command():
                 err_messages("AUT")
             else:
                 if flag_AUT==0:
-                    send_message("AUT "+user+" "+passwd+"\n")
-                    receive_message()
-                send_message(US_CS_DLU)
-                receive_message()
-                client.close()
+                    send_message("AUT "+user+" "+passwd+"\n", client)
+                send_message(US_CS_DLU, client)
+                receive_message(client)
                 user=""
                 passwd=""
-                reset_flag_AUT()
 
         elif get_field(commands,0)=="logout":
             if user == "" and passwd == "":
                 err_messages("AUT")
             else:
-                send_message("EXI\n")
-                client.close()
+                send_message("EXI\n", client)
+                receive_message(client)
                 user=""
                 passwd=""
-                reset_flag_AUT()
+
+        reset_flag_AUT()
+
 
 input_command()
 read_command()
