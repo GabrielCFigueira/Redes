@@ -15,7 +15,7 @@ global userCredentials# dictionary of user ids with their respective passwords
 def sigInt_handler(signum,frame):
     global server
     server.close()
-    exit()
+    exit(0)
 
 signal.signal(signal.SIGINT,sigInt_handler)
 
@@ -39,15 +39,14 @@ def TCPFunc(client_socket, adress, userCredentials, BSList):
         if istid in userCredentials:
             if userCredentials[istid] == password:
                 client_socket.send(US_CS_AUR_OK.encode())
-                return handle_client_connection(client_socket, istid, address)
+                handle_client_connection(client_socket, istid, address)
             else:
                 client_socket.send(US_CS_AUR_NOK.encode())
-                #client_socket.close()
+                client_socket.close()
         else:
             client_socket.send(US_CS_AUR_NEW.encode())
             addToDict(userCredentials, istid, password)
-            handle_client_connection(client_socket, istid, address)
-
+            client_socket.close()
 
 def handle_client_connection(client_socket, istid, address):
     message = client_socket.recv(1024).decode()
@@ -60,20 +59,19 @@ def handle_client_connection(client_socket, istid, address):
         del(userCredentials[istid]) #replace with abstraction func
         client_socket.send(US_CS_DLR_OK.encode())
 
-""" elif requirement == "BCK":
-    elif requirement == "RST":
-    elif requirement == "LSD":
-    elif requirement == "LSF":
-    elif requirement == "DEL":      """
+    """ elif requirement == "BCK":
+        elif requirement == "RST":
+        elif requirement == "LSD":
+        elif requirement == "LSF":
+        elif requirement == "DEL":  """
 
-    #exit()
+    client_socket.close()
 
 
 class UDP:
     def __init__(self, ip, port):
         self.ip = ip
         self.port = port
-        self.state = 0
 
 
 """
@@ -154,5 +152,6 @@ while True:
     #mutex.release()
     #if os.fork() == 0:
     print('Accepted connection from {}:{}'.format(address[0], address[1]))
-    TCPProcess = multiprocessing.Process(target=TCPFunc, args=(userCredentials, BSList))
+    TCPProcess = multiprocessing.Process(target=TCPFunc, args=(client_socket,
+address, userCredentials, BSList))
     TCPProcess.start()

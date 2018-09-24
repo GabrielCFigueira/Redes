@@ -26,7 +26,7 @@ if(len(sys.argv) != 1):
         if(sys.argv[i]=="-n"):
             CSname = sys.argv[i+1]
         if(sys.argv[i]=="-p"):
-            CSport = sys.argv[i+1]
+            CSport = eval(sys.argv[i+1])
         i=i+1
 
 #server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

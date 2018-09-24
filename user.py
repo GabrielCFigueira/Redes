@@ -52,13 +52,13 @@ def receive_message():
     if response=="AUR NOK\n":
         user = ""
         passwd = ""
-    
+
 
 def read_command():
     global user, passwd, flag_AUT, client
     command = ""
     while command != "exit":
-        command = input()
+        command = input(">")
         commands = command.split()
 
         if get_field(commands,0)=="login":
