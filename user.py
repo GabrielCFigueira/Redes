@@ -49,10 +49,10 @@ def receive_message(client):
     elif response=="AUR NOK\n":
         user = ""
         passwd = ""
+        client.close()
     elif response=="AUR NEW\n":
         print("User \"" + user + "\" created")
-
-    client.close()
+        client.close()
 
 #---------------------------------------------------------------
 def read_command():
