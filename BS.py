@@ -28,7 +28,7 @@ if(len(sys.argv) != 1):
 def UDP_Client():
     UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     UDPClientSocket.bind(('', BSport))
-    msgFromClient       = "REG" + socket.gethostbyname('') + str(BSport)
+    msgFromClient       = "REG " + socket.gethostbyname('') + " " + str(BSport)
     bytesToSend         = str.encode(msgFromClient)
     serverAddressPort   = (socket.gethostbyname(CSname), CSport)
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
