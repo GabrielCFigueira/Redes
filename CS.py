@@ -5,11 +5,11 @@ import sys
 import socket
 import os
 import signal
-import threading
+import multiprocessing
 
 CSPort = DEFAULT_PORT_CS
 
-userCredentials = { "86420" : "12345678" } # dictionary of user ids with their respective passwords
+global userCredentials# dictionary of user ids with their respective passwords
 
 
 def sigInt_handler(signum,frame):
@@ -19,13 +19,13 @@ def sigInt_handler(signum,frame):
 
 signal.signal(signal.SIGINT,sigInt_handler)
 
-def createUser(istid, password):
-    userCredentials[istid] = password
+def addToDict(dict, key, value):
+    dict[key] = value
 
 def printRequirement(istid, address, requestType, directory = ''):
     print("User:" + istid + " Requirement:" + requestType + "\nIP:" + str(address[0]) + " Port:" + str(address[1]))
 
-def authenticate(client_socket, adress):
+def TCPFunc(client_socket, adress, userCredentials, BSList):
     message = client_socket.recv(1024).decode()
     messages = message.split()
     if len(messages) == 0 or messages[0] == "EXI":
@@ -45,7 +45,7 @@ def authenticate(client_socket, adress):
                 #client_socket.close()
         else:
             client_socket.send(US_CS_AUR_NEW.encode())
-            createUser(istid, password)
+            addToDict(userCredentials, istid, password)
             handle_client_connection(client_socket, istid, address)
 
 
@@ -57,7 +57,7 @@ def handle_client_connection(client_socket, istid, address):
     requirement = messages[0]
     if requirement == "DLU":
         printRequirement(istid, address, "DLU")
-        del(userCredentials[istid])
+        del(userCredentials[istid]) #replace with abstraction func
         client_socket.send(US_CS_DLR_OK.encode())
 
 """ elif requirement == "BCK":
@@ -76,19 +76,14 @@ class UDP:
         self.state = 0
 
 
+"""
+#UDPWriter, UDPReader = os.pipe()
 
-if len(sys.argv) == 3 and sys.argv[1] == "-p":
-    CSPort = eval(sys.argv[2])
-elif len(sys.argv) > 1:
-    raise ValueError("numero errado de argumentos")
-    exit()
-
-
-UDPWriter, UDPReader = os.pipe()
-
-if os.fork() == 0:
+    if os.fork() == 0:
     os.close(UDPReader)
-    UDPWriter = os.fdopen(UDPWriter, 'w')
+    UDPWriter = os.fdopen(UDPWriter, 'w') """
+
+def UDPFunc(BSList):
     server = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     server.bind(('', CSPort))
     while True:
@@ -96,7 +91,9 @@ if os.fork() == 0:
         bytesAddressPair = server.recvfrom(1024)
 
         message = bytesAddressPair[0].decode()
-        UDPWriter.write(message)
+        messages = message.split()
+        BS = UDP(messages[1], messages[2])
+        BSList += [BS]
         address = bytesAddressPair[1]
 
         clientMsg = "Message from Client:{}".format(message)
@@ -109,10 +106,26 @@ if os.fork() == 0:
 
         server.sendto("RGR OK".encode(), address)
 
+
+if len(sys.argv) == 3 and sys.argv[1] == "-p":
+    CSPort = eval(sys.argv[2])
+elif len(sys.argv) > 1:
+    raise ValueError("numero errado de argumentos")
+    exit()
+
+manager = multiprocessing.Manager()
+userCredentials = manager.dict()
+userCredentials[86420] = "12345678" #exemplo
+BSList = manager.list(range(10))
+
+UDPProcess = multiprocessing.Process(target=UDPFunc, args=(BSList,))
+UDPProcess.start()
+
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(('', CSPort))
 server.listen(20)  # max backlog of connections
 
+"""
 PipeList = []
 BSList = []
 
@@ -129,18 +142,17 @@ def thread():
         for e in PipeList:
             e.write(message)
         mutex.release()
+"""
 
 
 
 while True:
     client_socket, address = server.accept()
-    leitorEscravo, escritorMestre = os.pipe()
-    mutex.acquire()
-    PipeList += [escritorMestre]
-    mutex.release()
-    if os.fork() == 0:
-
-        print('Accepted connection from {}:{}'.format(address[0], address[1]))
-        connectionClosed = False
-        connectionClosed = authenticate(client_socket, address)
-        exit()
+    #leitorEscravo, escritorMestre = os.pipe()
+    #mutex.acquire()
+    #PipeList += [escritorMestre]
+    #mutex.release()
+    #if os.fork() == 0:
+    print('Accepted connection from {}:{}'.format(address[0], address[1]))
+    TCPProcess = multiprocessing.Process(target=TCPFunc, args=(userCredentials, BSList))
+    TCPProcess.start()
