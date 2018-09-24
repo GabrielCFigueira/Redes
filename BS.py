@@ -2,37 +2,52 @@ import socket
 import sys
 import os
 import signal
+import multiprocessing
 
 i = 0
 BSport = 59000
 CSname = socket.gethostname()
 CSport = 58037
+global userCredentials
 userCredentials = { "86420" : "12345678" }
 bufferSize   = 1024
+manager = multiprocessing.Manager()
+userCredentials = manager.dict()
 
-def sigInt_handler(signum,frame):
-    #global server
-    global UDPClientSocket
-    #server.close()
-    UDPClientSocket.close()
-    exit()
-
-signal.signal(signal.SIGINT,sigInt_handler)
 
 if(len(sys.argv) != 1):
     while(i<len(sys.argv)):
         if(sys.argv[i]=="-b"):
-            BSport = sys.argv[i+1]
+            BSport = eval(sys.argv[i+1])
         if(sys.argv[i]=="-n"):
             CSname = sys.argv[i+1]
         if(sys.argv[i]=="-p"):
             CSport = eval(sys.argv[i+1])
         i=i+1
 
+def UDP_Client():
+    UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+    UDPClientSocket.bind(('', BSport))
+    msgFromClient       = "REG" + socket.gethostbyname('') + str(BSport)
+    bytesToSend         = str.encode(msgFromClient)
+    serverAddressPort   = (socket.gethostbyname(CSname), CSport)
+    UDPClientSocket.sendto(bytesToSend, serverAddressPort)
+
+    msgFromServer = UDPClientSocket.recvfrom(bufferSize)[0].decode()
+    print(msgFromServer)
+    UDPClientSocket.close()
+
 #server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #server.bind(('', BSport))
 #server.listen(20)
-UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+
+def sigInt_handler(signum,frame):
+    #global server
+    #server.close()
+    exit(0)
+
+signal.signal(signal.SIGINT,sigInt_handler)
+
 
 def printRequirement(istid, address, requestType, directory = ''):
     print("User:" + istid + " Requirement:" + requestType + "\nIP:" + str(address[0]) + " Port:" + str(address[1]))
@@ -73,8 +88,9 @@ def handle_UDP_connection():
     msgFromServer = UDPClientSocket.recvfrom(bufferSize)[0].decode()
     msg = "Message from Server {}".format(msgFromServer)
 
-while True:
-    handle_UDP_connection()
+
+UDPProcess = multiprocessing.Process(target=UDP_Client, args=())
+UDPProcess.start()
 
 #client_sock, address = server.accept()
 #print('Accepted connection from {}:{}'.format(address[0], address[1]))
