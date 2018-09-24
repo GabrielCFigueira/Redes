@@ -11,6 +11,7 @@ CSport = 58037
 global userCredentials
 userCredentials = { "86420" : "12345678" }
 bufferSize   = 1024
+msgFromClient=""
 manager = multiprocessing.Manager()
 userCredentials = manager.dict()
 
@@ -25,14 +26,12 @@ if(len(sys.argv) != 1):
             CSport = eval(sys.argv[i+1])
         i=i+1
 
-def UDP_Client():
+def UDP_Client(msgFromClient):
     UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     UDPClientSocket.bind(('', BSport))
-    msgFromClient       = "REG " + socket.gethostbyname('') + " " + str(BSport)
     bytesToSend         = str.encode(msgFromClient)
     serverAddressPort   = (socket.gethostbyname(CSname), CSport)
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
-
     msgFromServer = UDPClientSocket.recvfrom(bufferSize)[0].decode()
     print(msgFromServer)
     UDPClientSocket.close()
@@ -44,6 +43,8 @@ def UDP_Client():
 def sigInt_handler(signum,frame):
     #global server
     #server.close()
+    msgFromClient = "UNR " + socket.gethostbyname('') + " " + str(BSport)
+    UDP_Client(msgFromClient)
     exit(0)
 
 signal.signal(signal.SIGINT,sigInt_handler)
@@ -89,9 +90,9 @@ def handle_UDP_connection():
     msg = "Message from Server {}".format(msgFromServer)
 
 
-UDPProcess = multiprocessing.Process(target=UDP_Client, args=())
+msgFromClient = "REG " + socket.gethostbyname('') + " " + str(BSport)
+UDPProcess = multiprocessing.Process(target=UDP_Client, args=(msgFromClient,))
 UDPProcess.start()
-
 #client_sock, address = server.accept()
 #print('Accepted connection from {}:{}'.format(address[0], address[1]))
 #handle_TCP_connection(client_sock)
