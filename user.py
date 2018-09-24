@@ -39,7 +39,7 @@ def send_message(message, client):
 
 def receive_message(client):
     global user, passwd, flag_AUT
-    
+
     response = client.recv(4096).decode()
     err_messages(response)
 
@@ -53,6 +53,8 @@ def receive_message(client):
     elif response=="AUR NEW\n":
         print("User \"" + user + "\" created")
         client.close()
+    elif response=="EXI\n":
+        client.close()
 
 #---------------------------------------------------------------
 def read_command():
@@ -60,8 +62,10 @@ def read_command():
     command = ""
     while command != "exit":
         command = input("> ")
-        commands = command.split()
 
+        commands = command.split()
+        if get_field(commands,0) == "exit":
+            break
         client=creatClient()
         connect_TCP(client)
 
@@ -96,8 +100,8 @@ def read_command():
                 receive_message(client)
                 user=""
                 passwd=""
-
         reset_flag_AUT()
+
 
 
 input_command()

@@ -30,6 +30,7 @@ def TCPFunc(client_socket, adress, userCredentials, BSList):
     messages = message.split()
     if len(messages) == 0 or messages[0] == "EXI":
         client_socket.close()
+        exit(0)
     elif messages[0] != "AUT":
         client_socket.send("ERR AUT\n".encode())
     else:
@@ -54,6 +55,7 @@ def handle_client_connection(client_socket, istid, address):
     if len(messages) == 0 or messages[0] == "EXI":
         client_socket.send("EXI\n".encode())
         client_socket.close()
+        exit(0)
     requirement = messages[0]
     if requirement == "DLU":
         printRequirement(istid, address, "DLU")
@@ -83,6 +85,7 @@ class UDP:
     UDPWriter = os.fdopen(UDPWriter, 'w') """
 
 def UDPFunc(BSList):
+    global server
     server = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     server.bind(('', CSPort))
     while True:
