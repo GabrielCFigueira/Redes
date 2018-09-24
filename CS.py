@@ -30,7 +30,6 @@ def authenticate(client_socket, adress):
     messages = message.split()
     if len(messages) == 0 or messages[0] == "EXI":
         client_socket.close()
-        return True
     elif messages[0] != "AUT":
         client_socket.send("ERR AUT\n".encode())
     else:
@@ -47,8 +46,7 @@ def authenticate(client_socket, adress):
         else:
             client_socket.send(US_CS_AUR_NEW.encode())
             createUser(istid, password)
-            return handle_client_connection(client_socket, istid, address)
-    return False
+            handle_client_connection(client_socket, istid, address)
 
 
 def handle_client_connection(client_socket, istid, address):
@@ -56,13 +54,12 @@ def handle_client_connection(client_socket, istid, address):
     messages = message.split()
     if len(messages) == 0 or messages[0] == "EXI":
         client_socket.close()
-        return True
     requirement = messages[0]
     if requirement == "DLU":
         printRequirement(istid, address, "DLU")
         del(userCredentials[istid])
         client_socket.send(US_CS_DLR_OK.encode())
-    return False
+
 """ elif requirement == "BCK":
     elif requirement == "RST":
     elif requirement == "LSD":
@@ -127,8 +124,10 @@ def thread():
         message = UDPReader.read()
         messages = message.split()
         BS = UDP(messages[1], messages[2])
-        mutex.acquire()
         BSList += [BS]
+        mutex.acquire()
+        for e in PipeList:
+            e.write(message)
         mutex.release()
 
 
@@ -136,11 +135,12 @@ def thread():
 while True:
     client_socket, address = server.accept()
     leitorEscravo, escritorMestre = os.pipe()
+    mutex.acquire()
     PipeList += [escritorMestre]
+    mutex.release()
     if os.fork() == 0:
 
         print('Accepted connection from {}:{}'.format(address[0], address[1]))
         connectionClosed = False
-        while not connectionClosed:
-            connectionClosed = authenticate(client_socket, address)
-            exit()
+        connectionClosed = authenticate(client_socket, address)
+        exit()
