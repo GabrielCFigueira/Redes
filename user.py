@@ -44,14 +44,21 @@ def receive_message(client):
     err_messages(response)
 
     if response=="AUR OK\n":
+        if flag_AUT==2:
+            print("Logged in")
         flag_AUT=1
-        print("Logged in")
     elif response=="AUR NOK\n":
         user = ""
         passwd = ""
+        reset_flag_AUT()
         client.close()
     elif response=="AUR NEW\n":
         print("User \"" + user + "\" created")
+        reset_flag_AUT()
+        client.close()
+    elif response=="DLR OK\n":
+        print("User deleted")
+        reset_flag_AUT()
         client.close()
     elif response=="EXI\n":
         client.close()
@@ -59,21 +66,21 @@ def receive_message(client):
 #---------------------------------------------------------------
 def read_command():
     global user, passwd, flag_AUT
-    command = ""
-    while command != "exit":
+    while True:
         command = input("> ")
-
         commands = command.split()
-        if get_field(commands,0) == "exit":
-            break
-        client=creatClient()
-        connect_TCP(client)
 
-        if get_field(commands,0)=="login":
+        if get_field(commands,0)=="exit":
+            break
+
+        elif get_field(commands,0)=="login":
             if user == "" and passwd == "":
                 if len(commands)!=3:
                     err_messages("AUT")
                 else:
+                    flag_AUT=2
+                    client=creatClient()
+                    connect_TCP(client)
                     user=get_field(commands,1)
                     passwd=get_field(commands,2)
                     send_message("AUT "+user+" "+passwd+"\n", client)
@@ -83,24 +90,32 @@ def read_command():
 
         elif get_field(commands,0)=="deluser":
             if user == "" and passwd == "":
-                err_messages("AUT")
+                err_messages("ERR AUT\n")
             else:
                 if flag_AUT==0:
+                    client=creatClient()
+                    connect_TCP(client)
                     send_message("AUT "+user+" "+passwd+"\n", client)
+                    receive_message(client)
                 send_message(US_CS_DLU, client)
                 receive_message(client)
                 user=""
                 passwd=""
+                reset_flag_AUT()
 
         elif get_field(commands,0)=="logout":
             if user == "" and passwd == "":
-                err_messages("AUT")
+                err_messages("ERR AUT\n")
             else:
+                if flag_AUT==0:
+                    client=creatClient()
+                    connect_TCP(client)
+                    send_message("AUT "+user+" "+passwd+"\n", client)
                 send_message("EXI\n", client)
                 receive_message(client)
                 user=""
                 passwd=""
-        reset_flag_AUT()
+                reset_flag_AUT()
 
 
 
