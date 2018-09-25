@@ -163,20 +163,21 @@ def UDPFunc(BSList):
 
         message, address = server.recvfrom(1024)
         ip, port = address
-        message = message.decode()
-        if message == "REG\n":
+        message = message.decode().split()
+        if message[0] == "REG":
             bs = BS(ip, port)
             BSList += [bs]
-            server.sendto("RGR OK".encode(), ip)
-        elif message == "UNR\n":
+            server.sendto("RGR OK".encode(), (ip, port))
+        elif message[0] == "UNR":
+            print(BSList[0].getIp())
             for e in range(len(BSList)):
                 if BSList[e].getIp() == ip:
                     del(BSList[e])
-            server.sendto("UAR OK".encode(), ip)
+            server.sendto("UAR OK".encode(), (ip,port))
 
         clientIP  = "Client IP Address:{}".format(ip)
 
-        print(clientIP + " " port)
+        print(clientIP + " " + str(port))
 
         # Sending a reply to client
 
@@ -190,7 +191,7 @@ elif len(sys.argv) > 1:
 manager = multiprocessing.Manager()
 userCredentials = manager.dict()
 userCredentials["86420"] = "12345678" #exemplo
-BSList = manager.list(range(10))
+BSList = manager.list()
 
 UDPProcess = multiprocessing.Process(target=UDPFunc, args=(BSList,))
 UDPProcess.start()
