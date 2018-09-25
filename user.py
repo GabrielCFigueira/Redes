@@ -74,6 +74,7 @@ def read_command():
         if get_field(commands,0)=="exit":
             break
 
+        #***** LOGIN *****
         elif get_field(commands,0)=="login":
             if user == "" and passwd == "":
                 if len(commands)!=3:
@@ -89,6 +90,7 @@ def read_command():
             else:
                 err_messages("ERR_login")
 
+        #***** DELUSER *****
         elif get_field(commands,0)=="deluser":
             if user == "" and passwd == "":
                 err_messages("ERR AUT\n")
@@ -104,6 +106,7 @@ def read_command():
                 passwd=""
                 reset_flag_AUT()
 
+        #***** LOGOUT *****
         elif get_field(commands,0)=="logout":
             if user == "" and passwd == "":
                 err_messages("ERR AUT\n")
@@ -117,6 +120,61 @@ def read_command():
                 user=""
                 passwd=""
                 reset_flag_AUT()
+        
+        #***** BACKUP *****
+        elif get_field(commands,0)=="backup":
+            if flag_AUT==0:
+                client=creatClient()
+                connect_TCP(client)
+                send_message("AUT "+user+" "+passwd+"\n", client)
+                receive_message(client)
+            send_message(US_CS_BCK + " " + get_field(commands,1) + " " + get_field(commands, 2) + "\n", client)
+            receive_message(client)
+            reset_flag_AUT()
+
+        #***** RESTORE *****
+        elif get_field(commands,0)=="restore":
+            if flag_AUT==0:
+                client=creatClient()
+                connect_TCP(client)
+                send_message("AUT "+user+" "+passwd+"\n", client)
+                receive_message(client)
+            send_message(US_CS_RST + " " + get_field(commands,1) + "\n", client)
+            receive_message(client)
+            reset_flag_AUT()
+
+        #***** DIRLIST *****
+        elif get_field(commands,0)=="dirlist":
+            if flag_AUT==0:
+                client=creatClient()
+                connect_TCP(client)
+                send_message("AUT "+user+" "+passwd+"\n", client)
+                receive_message(client)
+            send_message(US_CS_LSD, client)
+            receive_message(client)
+            reset_flag_AUT()
+
+        #***** FILELIST *****
+        elif get_field(commands,0)=="filelist":
+            if flag_AUT==0:
+                client=creatClient()
+                connect_TCP(client)
+                send_message("AUT "+user+" "+passwd+"\n", client)
+                receive_message(client)
+            send_message(US_CS_LSF + " " + get_field(commands,1) + "\n", client)
+            receive_message(client)
+            reset_flag_AUT()
+
+        #***** DELETE *****
+        elif get_field(commands,0)=="delete":
+            if flag_AUT==0:
+                client=creatClient()
+                connect_TCP(client)
+                send_message("AUT "+user+" "+passwd+"\n", client)
+                receive_message(client)
+            send_message(US_CS_DEL + " " + get_field(commands,1) + "\n", client)
+            receive_message(client)
+            reset_flag_AUT()
 
 
 

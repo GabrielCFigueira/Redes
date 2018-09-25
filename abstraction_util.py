@@ -10,6 +10,16 @@ US_CS_DLU = 'DLU\n'
 US_CS_DLR_OK = 'DLR OK\n'
 US_CS_DLR_NOK = 'DLR NOK\n'
 
+US_CS_BCK = 'BCK'
+
+US_CS_RST = 'RST'
+
+US_CS_LSD = 'LSD\n'
+
+US_CS_LSF = 'LSF'
+
+US_CS_DEL = 'DEL'
+
 def get_field(list, pos):
     return list[pos]
 
