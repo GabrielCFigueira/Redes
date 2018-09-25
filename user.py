@@ -43,20 +43,20 @@ def receive_message(client):
     response = client.recv(4096).decode()
     err_messages(response)
 
-    if response=="AUR OK\n":
+    if response==US_CS_AUR_OK:
         if flag_AUT==2:
             print("Logged in")
         flag_AUT=1
-    elif response=="AUR NOK\n":
+    elif response==US_CS_AUR_NOK:
         user = ""
         passwd = ""
         reset_flag_AUT()
         client.close()
-    elif response=="AUR NEW\n":
+    elif response==US_CS_AUR_NEW:
         print("User \"" + user + "\" created")
         reset_flag_AUT()
         client.close()
-    elif response=="DLR OK\n":
+    elif response==US_CS_DLR_OK:
         print("User deleted")
         reset_flag_AUT()
         client.close()
