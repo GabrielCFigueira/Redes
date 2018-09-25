@@ -130,8 +130,16 @@ class File:
     def equals(self, file):
         return self.name == file.getName()
 
-    #def olderThan(self, file):
-
+    def olderThan(self, file):
+        if self.date > file.getDate():
+            return True
+        elif self.date < file.getDate():
+            return False
+        else:
+            if self.time < file.getTime():
+                return True
+            else:
+                return False
 
     def getName(self):
         return file.name
