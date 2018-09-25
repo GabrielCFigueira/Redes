@@ -27,7 +27,7 @@ if(len(sys.argv) != 1):
         i=i+1
 
 def UDP_Client(msgFromClient):
-    UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+    global UDPClientSocket
     bytesToSend         = str.encode(msgFromClient)
     serverAddressPort   = (socket.gethostbyname(CSname), CSport)
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
@@ -95,6 +95,7 @@ def handle_client_connection(client_socket, istid, address):
 
 
 msgFromClient = "REG " + socket.gethostbyname(socket.gethostname()) + " " + str(BSport)
+UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 UDPProcess = multiprocessing.Process(target=UDP_Client, args=(msgFromClient,))
 UDPProcess.start()
 
