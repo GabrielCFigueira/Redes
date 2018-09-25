@@ -177,7 +177,6 @@ def UDPFunc(BSList):
             BSList += [bs]
             server.sendto("RGR OK".encode(), (ip, port))
         elif message[0] == "UNR":
-            print(BSList[0].getIp())
             for e in range(len(BSList)):
                 if BSList[e].getIp() == ip:
                     del(BSList[e])
