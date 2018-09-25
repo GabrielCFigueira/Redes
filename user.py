@@ -61,6 +61,7 @@ def receive_message(client):
         reset_flag_AUT()
         client.close()
     elif response=="EXI\n":
+        print("Logged out")
         client.close()
 
 #---------------------------------------------------------------
