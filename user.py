@@ -73,7 +73,7 @@ def read_command():
 
         if get_field(commands,0)=="exit":
             break
-
+        
         #***** LOGIN *****
         elif get_field(commands,0)=="login":
             if user == "" and passwd == "":

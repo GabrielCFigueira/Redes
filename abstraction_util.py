@@ -27,7 +27,7 @@ def addToDict(dict, key, value):
     dict[key] = value
 
 def removeFromDict(dict, key):
-    del(set[key])
+    del(dict[key])
 
 
 def err_messages(flag):
