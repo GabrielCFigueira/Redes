@@ -28,7 +28,6 @@ if(len(sys.argv) != 1):
 
 def UDP_Client(msgFromClient):
     UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-    UDPClientSocket.bind(('', BSport)) #erro aqui
     bytesToSend         = str.encode(msgFromClient)
     serverAddressPort   = (socket.gethostbyname(CSname), CSport)
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
@@ -43,7 +42,7 @@ def addToDict(dict, key, value):
 def sigInt_handler(signum,frame):
     #global server
     #server.close()
-    msgFromClient = "UNR " + socket.gethostbyname('') + " " + str(BSport)
+    msgFromClient = "UNR " + socket.gethostbyname(socket.gethostname()) + " " + str(BSport)
     UDP_Client(msgFromClient)
     exit(0)
 
@@ -95,7 +94,7 @@ def handle_client_connection(client_socket, istid, address):
     client_socket.close()
 
 
-msgFromClient = "REG " + socket.gethostbyname('') + " " + str(BSport)
+msgFromClient = "REG " + socket.gethostbyname(socket.gethostname()) + " " + str(BSport)
 UDPProcess = multiprocessing.Process(target=UDP_Client, args=(msgFromClient,))
 UDPProcess.start()
 

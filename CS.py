@@ -6,6 +6,7 @@ import socket
 import os
 import signal
 import multiprocessing
+import datetime
 
 CSPort = DEFAULT_PORT_CS
 
@@ -19,8 +20,6 @@ def sigInt_handler(signum,frame):
 
 signal.signal(signal.SIGINT,sigInt_handler)
 
-def addToDict(dict, key, value):
-    dict[key] = value
 
 def printRequirement(istid, address, requestType, directory = ''):
     print("User:" + istid + " Requirement:" + requestType + "\nIP:" + str(address[0]) + " Port:" + str(address[1]))
@@ -59,7 +58,7 @@ def handle_client_connection(client_socket, istid, address):
     requirement = messages[0]
     if requirement == "DLU":
         printRequirement(istid, address, "DLU")
-        del(userCredentials[istid]) #replace with abstraction func
+        removeFromDict(userCredentials, istid)
         client_socket.send(US_CS_DLR_OK.encode())
 
     """ elif requirement == "BCK":
@@ -71,10 +70,82 @@ def handle_client_connection(client_socket, istid, address):
     client_socket.close()
 
 
-class UDP:
+class BS:
     def __init__(self, ip, port):
         self.ip = ip
         self.port = port
+
+    def getIp(self):
+        return self.ip
+
+    def getPort(self):
+        return self.port
+
+
+class User:
+    def __init__(self, istid, password):
+        self.istid = istid
+        self.password = password
+        self.dirs = []
+    def addDir(self, dir):
+        self.dirs += [dir]
+    def removeDir(self, dirName):
+        for e in range(len(self.dirs)):
+            if self.dirs[e].getName() == dirName:
+                del(self.dirs[e])
+    def getIstid(self):
+        return self.istid
+    def getPassword(self):
+        return self.password
+
+
+
+class Dir:
+    def __init__(self, name, bs):
+        self.name = name
+        self.files = []
+        self.bs = bs
+
+    def getName(self):
+        return self.name
+
+    def getBS(self):
+        return self.bs
+
+    def addFile(self, file):
+        self.files += [file]
+
+
+#D = datetime.date(year, month, dia) to create date type
+#H = datetime.time(hour, minutes, seconds) to create time type
+
+
+class File:
+    def __init__(self, name, date, hour, size):
+        self.name = name
+        self.date = date
+        self.hour = hour
+        self.size = size
+
+    def equals(self, file):
+        return self.name == file.getName()
+
+    #def olderThan(self, file):
+
+
+    def getName(self):
+        return file.name
+
+    def getDate(self):
+        return self.date
+
+    def getHour(self):
+        return self.hour
+
+    def getSize(self):
+        return self.size
+
+
 
 
 """
@@ -90,23 +161,24 @@ def UDPFunc(BSList):
     server.bind(('', CSPort))
     while True:
 
-        bytesAddressPair = server.recvfrom(1024)
+        message, address = server.recvfrom(1024)
+        ip, port = address
+        message = message.decode()
+        if message == "REG\n":
+            bs = BS(ip, port)
+            BSList += [bs]
+            server.sendto("RGR OK".encode(), ip)
+        elif message == "UNR\n":
+            for e in range(len(BSList)):
+                if BSList[e].getIp() == ip:
+                    del(BSList[e])
+            server.sendto("UAR OK".encode(), ip)
 
-        message = bytesAddressPair[0].decode()
-        messages = message.split()
-        BS = UDP(messages[1], messages[2])
-        BSList += [BS]
-        address = bytesAddressPair[1]
+        clientIP  = "Client IP Address:{}".format(ip)
 
-        clientMsg = "Message from Client:{}".format(message)
-        clientIP  = "Client IP Address:{}".format(address)
-
-        print(clientMsg)
-        print(clientIP)
+        print(clientIP + " " port)
 
         # Sending a reply to client
-
-        server.sendto("RGR OK".encode(), address)
 
 
 if len(sys.argv) == 3 and sys.argv[1] == "-p":

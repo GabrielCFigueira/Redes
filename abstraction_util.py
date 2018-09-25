@@ -13,6 +13,13 @@ US_CS_DLR_NOK = 'DLR NOK\n'
 def get_field(list, pos):
     return list[pos]
 
+def addToDict(dict, key, value):
+    dict[key] = value
+
+def removeFromDict(dict, key):
+    del(set[key])
+
+
 def err_messages(flag):
     if flag=="ERR AUT\n":
         print("Para se autenticar tem que executar: login user pass")
