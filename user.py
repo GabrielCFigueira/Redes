@@ -11,6 +11,7 @@ CSport = DEFAULT_PORT_CS
 user=""
 passwd=""
 flag_AUT=0
+backup_path=""
 
 #---------------------------------------------------------------
 def input_command():
@@ -40,10 +41,11 @@ def send_message(message, client):
     client.send(message.encode())
 
 def receive_message(client):
-    global user, passwd, flag_AUT
+    global user, passwd, flag_AUT, backup_path
 
     response = client.recv(4096).decode()
     err_messages(response)
+    responses = response.split()
 
     print(response)
 
@@ -67,10 +69,31 @@ def receive_message(client):
     elif response=="EXI\n":
         print("Logged out")
         client.close()
+    elif responses[0]=="BKR":
+        print(responses)
+        client.close()
+        """
+        BSName = responses[1]
+        BSPort = responses[2]
+        N_files = responses[3]
+        client.close()
+
+        BSClient=creatClient()
+        BSClient.connect((BSName, BSPort))
+
+        send_message("UPL " + backup_path + " " + N_files, BSClient)
+
+        BSresponse = client.recv(4096).decode()
+
+        for i in range(N_files):
+            send_message("", BSClient)
+        response = client.recv(4096).decode()
+        BSClient.close()"""
+
 
 #---------------------------------------------------------------
 def read_command():
-    global user, passwd, flag_AUT
+    global user, passwd, flag_AUT, backup_path
     while True:
         command = input("> ")
         commands = command.split()
@@ -134,7 +157,7 @@ def read_command():
                 receive_message(client)
 
             directory = get_field(commands,1)
-            n_files= len(os.listdir(directory))
+            n_files = len(os.listdir(directory))
 
             string = US_CS_BCK + " " + directory + " " + str(n_files)
             if os.path.isdir(directory):
@@ -148,6 +171,7 @@ def read_command():
             
             print(string)
             send_message( string + "\n", client)
+            backup_path=directory
             receive_message(client)
             reset_flag_AUT()
 
