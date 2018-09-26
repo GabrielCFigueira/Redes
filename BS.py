@@ -35,16 +35,15 @@ def UDP_Client(msgFromClient):
     print(msgFromServer)
     UDPClientSocket.close()
     if msgFromServer=="RGR OK":
+        global server
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.bind(('', BSport))
         server.listen(20)
         while True:
-            a=1
-        """
             client_socket, address = server.accept()
             print('Accepted connection from {}:{}'.format(address[0], address[1]))
             TCPProcess = multiprocessing.Process(target=TCP_Server, args=(client_socket,address, userCredentials))
-            TCPProcess.start()"""
+            TCPProcess.start()
 
 def UDP_Server():
     global UDP_Server
@@ -62,6 +61,7 @@ def UDP_Server():
         elif message[0] == "LSU":
             addToDict(userCredentials,message[1],message[2])
             UDP_Server.sendto("LUR OK".encode(), (ip,port))
+        #elif message[0] == "DLB":
 
         clientIP  = "Client IP Address:{}".format(ip)
 
@@ -78,17 +78,16 @@ def sigInt_handler(signum,frame):
     #server.close()
     #server = socket.getaddrinfo(None,BSport)
     #server.close()
-   # global server
-  #  server.close()
-    #msgFromClient = "UNR " + socket.gethostbyname(socket.gethostname()) + " " + str(BSport)
-    #UDP_Client(msgFromClient)
- #   exit(0)
-    HOST = None               # Symbolic name meaning all available interfaces
+    global server
+    server.close()
+    msgFromClient = "UNR " + socket.gethostbyname(socket.gethostname()) + " " + str(BSport)
+    UDP_Client(msgFromClient)
+    exit(0)
+    """HOST = None               # Symbolic name meaning all available interfaces
     s = None
     for res in socket.getaddrinfo(HOST, CSport, socket.AF_UNSPEC,
                                 socket.SOCK_STREAM, 0, socket.AI_PASSIVE):
-        af, socktype, proto, canonname, sa = res
-        print(socket.getservbyport(int(proto)+"\n")
+        af, socktype, proto, canonname, sa = res    
         try:
             s = socket.socket(af, socktype, proto)
         except socket.error as msg:
@@ -111,9 +110,9 @@ def sigInt_handler(signum,frame):
         conn.send(data)
     msgFromClient = "UNR " + socket.gethostbyname(socket.gethostname()) + " " + str(BSport)
     UDP_Client(msgFromClient)
-    conn.close()
+    conn.close()"""
 
-signal.signal(signal.SIGINT,sigInt_handler)
+#signal.signal(signal.SIGINT,sigInt_handler)
 
 
 def printRequirement(istid, address, requestType, directory = ''):
@@ -163,5 +162,6 @@ def handle_client_connection(client_socket, istid, address):
 
 msgFromClient = "REG " + socket.gethostbyname(socket.gethostname()) + " " + str(BSport)
 UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-UDPProcess = multiprocessing.Process(target=UDP_Client, args=(msgFromClient,))
-UDPProcess.start()
+UDP_Client(msgFromClient)
+#UDPProcess = multiprocessing.Process(target=UDP_Client, args=(msgFromClient,))
+#UDPProcess.start()
