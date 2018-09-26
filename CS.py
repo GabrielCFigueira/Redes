@@ -61,8 +61,26 @@ def handle_client_connection(client_socket, istid, address):
         removeFromDict(userCredentials, istid)
         client_socket.send(US_CS_DLR_OK.encode())
 
-    """ elif requirement == "BCK":
-        elif requirement == "RST":
+    elif requirement == "BCK":
+        printRequirement(istid, address, "BCK")
+        dir = Dir(messages[2], BSList[0])
+        #register user in BS
+        n_files = eval(messages[3])
+        for e in range(n_files):
+            name = messages[4 + e*4]
+            date = messages[5 + e*4].split('.')
+            time = messages[6 + e*4].split('.')
+            size = eval(messages[7 + e*4])
+            print(name + " " + messages[5 + e*4] + " " + messages[6 + e*4] + " " + str(size))
+            date = datetime.date(date[2], date[1], date[0])
+            time = datetime.time(time[2], time[1], time[0])
+            file = File(name, date, time, size)
+            dir.addFile(file)
+
+        userCredentials[istid].addDir(dir)
+
+
+    """ elif requirement == "RST":
         elif requirement == "LSD":
         elif requirement == "LSF":
         elif requirement == "DEL":  """
@@ -121,10 +139,10 @@ class Dir:
 
 
 class File:
-    def __init__(self, name, date, hour, size):
+    def __init__(self, name, date, time, size):
         self.name = name
         self.date = date
-        self.hour = hour
+        self.time = time
         self.size = size
 
     def equals(self, file):
@@ -147,8 +165,8 @@ class File:
     def getDate(self):
         return self.date
 
-    def getHour(self):
-        return self.hour
+    def getTime(self):
+        return self.time
 
     def getSize(self):
         return self.size
