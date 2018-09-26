@@ -35,6 +35,29 @@ def UDP_Client(msgFromClient):
     print(msgFromServer)
     UDPClientSocket.close()
 
+def UDP_Server():
+    global UDP_Server
+    UDP_Server = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+    UDP_Server.bind(('', BSPort))
+    while True:
+
+        message, address = UDP_Server.recvfrom(1024)
+        ip, port = address
+        message = message.decode().split()
+        if message[0] == "LSF":
+            userID = message[1]
+            dirName = message[2]
+            UDP_Server.sendto("LFD".encode(), (ip, port))
+        elif message[0] == "LSU":
+            addToDict(userCredentials,message[1],message[2])
+            UDP_Server.sendto("LUR OK".encode(), (ip,port))
+
+        clientIP  = "Client IP Address:{}".format(ip)
+
+        print(clientIP + " " + str(port))
+
+        # Sending a reply to client
+
 
 def addToDict(dict, key, value):
     dict[key] = value
@@ -104,7 +127,7 @@ server.bind(('', BSport))
 server.listen(20)
 
 while True:
-    client_sock, address = server.accept()
+    client_socket, address = server.accept()
     print('Accepted connection from {}:{}'.format(address[0], address[1]))
     TCPProcess = multiprocessing.Process(target=TCP_Server, args=(client_socket,address, userCredentials))
     TCPProcess.start()
