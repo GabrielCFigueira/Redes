@@ -70,9 +70,6 @@ def receive_message(client):
         print("Logged out")
         client.close()
     elif responses[0]=="BKR":
-        print(responses)
-        client.close()
-        """
         BSName = responses[1]
         BSPort = responses[2]
         N_files = responses[3]
@@ -85,10 +82,30 @@ def receive_message(client):
 
         BSresponse = client.recv(4096).decode()
 
-        for i in range(N_files):
-            send_message("", BSClient)
+        i=4
+        files_to_print=""
+        while i+4 <= len(responses):
+            filename = os.path.join(directory, responses[i])
+            file_size = os.path.getsize(filename)
+            file_datetime = os.path.getmtime(filename)
+            string = filename
+            string+= " " + datetime.fromtimestamp(file_datetime).strftime('%d.%m.%Y %H:%M:%S')
+            string+= " " + str(file_size)
+            files_to_print += " " + filename
+
+            file = open(backup_path+"\\"+filname, "r") 
+            string+=file.read().encode()
+            file.close()
+
+            i=i+4
+            send_message(string.encode(), BSClient)
+
         response = client.recv(4096).decode()
-        BSClient.close()"""
+        if response=="UPR OK":
+            print("completed - " + backup_path + files_to_print)
+        
+        backup_path=""
+        BSClient.close()
 
 
 #---------------------------------------------------------------
