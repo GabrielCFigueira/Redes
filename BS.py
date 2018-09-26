@@ -35,15 +35,18 @@ def UDP_Client(msgFromClient):
     print(msgFromServer)
     UDPClientSocket.close()
     if msgFromServer=="RGR OK":
-        global server
-        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server.bind(('', BSport))
-        server.listen(20)
-        while True:
-            client_socket, address = server.accept()
-            print('Accepted connection from {}:{}'.format(address[0], address[1]))
-            TCPProcess = multiprocessing.Process(target=TCP_Server, args=(client_socket,address, userCredentials))
-            TCPProcess.start()
+        create_TCP_Server()
+        
+def create_TCP_Server():
+    global server
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind(('', BSport))
+    server.listen(20)
+    while True:
+        client_socket, address = server.accept()
+        print('Accepted connection from {}:{}'.format(address[0], address[1]))
+        TCPProcess = multiprocessing.Process(target=TCP_Server, args=(client_socket,address, userCredentials))
+        TCPProcess.start()
 
 def UDP_Server():
     global UDP_Server
