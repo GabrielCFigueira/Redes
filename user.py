@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 from abstraction_util import *
+from datetime import datetime
 
 import sys
 import socket
+import os
 
 CSname = socket.gethostname()
 CSport = DEFAULT_PORT_CS
@@ -128,7 +130,22 @@ def read_command():
                 connect_TCP(client)
                 send_message("AUT "+user+" "+passwd+"\n", client)
                 receive_message(client)
-            send_message(US_CS_BCK + " " + get_field(commands,1) + " " + get_field(commands, 2) + "\n", client)
+
+            directory = get_field(commands,1)
+            n_files= len(os.listdir(directory))
+
+            string = US_CS_BCK + " " + directory + " " + str(n_files)
+            if os.path.isdir(directory):
+                for file in os.listdir(directory):
+                    filename = os.path.join(directory, file)
+                    file_size = os.path.getsize(filename)
+                    file_datetime = os.path.getmtime(filename)
+                    string+= " " + file
+                    string+= " " + datetime.fromtimestamp(file_datetime).strftime('%d.%m.%Y %H:%M:%S')
+                    string+= " " + str(file_size)
+            
+            print(string)
+            send_message( string + "\n", client)
             receive_message(client)
             reset_flag_AUT()
 
