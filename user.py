@@ -45,6 +45,8 @@ def receive_message(client):
     response = client.recv(4096).decode()
     err_messages(response)
 
+    print(response)
+
     if response==US_CS_AUR_OK:
         if flag_AUT==2:
             print("Logged in")
