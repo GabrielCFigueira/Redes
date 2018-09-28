@@ -30,6 +30,16 @@ def removeFromDict(dict, key):
     del(dict[key])
 
 
+def receive_string(client):
+  string = ""
+  char = ""
+  while char != "\n":
+     char = client.recv(1).decode()
+     string += char
+  string += "\n"
+  return string
+
+
 def err_messages(flag):
     if flag=="ERR AUT\n":
         print("Para se autenticar tem que executar: login user pass")
