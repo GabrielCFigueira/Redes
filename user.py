@@ -155,12 +155,6 @@ def read_command():
             if user == "" and passwd == "":
                 err_messages("ERR AUT\n")
             else:
-                if flag_AUT==0:
-                    client=creatClient()
-                    connect_TCP(client)
-                    send_message("AUT "+user+" "+passwd+"\n", client)
-                send_message("EXI\n", client)
-                receive_message(client)
                 user=""
                 passwd=""
                 reset_flag_AUT()
