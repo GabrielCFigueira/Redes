@@ -60,7 +60,18 @@ def UDP_Server():
         if message[0] == "LSF":
             userID = message[1]
             dirName = message[2]
-            UDP_Server.sendto("LFD".encode(), (ip, port))
+            files_list = os.listdir(dirName)
+            if files_list != []:
+                UDP_Server.sendto("LFD OK".encode(), (ip, port))
+                for file in files_list:
+                    string=""
+                    filename = os.path.join(dirName, file)
+                    date_time=os.path.getmtime(filename)
+                    size=os.path.getSize(filename)
+                    string+= " " + file
+                    string+= " " + datetime.fromtimestamp(date_time).strftime('%d.%m.%Y %H:%M:%S')
+                    string+= " " + str(size) + " "
+                    UDP_Server.sendto(string, (ip, port))
         elif message[0] == "LSU":
             addToDict(userCredentials,message[1],message[2])
             UDP_Server.sendto("LUR OK".encode(), (ip,port))
