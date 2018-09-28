@@ -106,6 +106,16 @@ def receive_message(client):
         
         backup_path=""
         BSClient.close()
+        
+        elif response=='DDR OK\n':
+            print("Deleted")
+            reset_flag_AUT()
+            client.close()
+            
+        elif response=='DDR NOK\n':
+            print("Not Deleted")
+            reset_flag_AUT()
+            client.close()
 
 
 #---------------------------------------------------------------
