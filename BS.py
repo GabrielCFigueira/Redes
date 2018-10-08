@@ -18,12 +18,20 @@ userCredentials = manager.dict()
 
 if(len(sys.argv) != 1):
     while(i<len(sys.argv)):
-        if(sys.argv[i]=="-b"):
-            BSport = eval(sys.argv[i+1])
-        if(sys.argv[i]=="-n"):
+        if sys.argv[i]=="-b":
+            try:
+                BSport = int(get_field(sys.argv, i+1))
+            except ValueError:
+                print("BSport must be an integer")
+                exit(-1)
+        if sys.argv[i]=="-n":
             CSname = sys.argv[i+1]
-        if(sys.argv[i]=="-p"):
-            CSport = eval(sys.argv[i+1])
+        if sys.argv[i]=="-p":
+            try:
+                CSport = int(get_field(sys.argv, i+1))
+            except ValueError:
+                print("CSport must be an integer")
+                exit(-1)
         i=i+1
 
 def UDP_Client(msgFromClient):
